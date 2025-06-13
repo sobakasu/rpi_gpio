@@ -1,10 +1,4 @@
 /*
-Original code by Ben Croston modified for Ruby by Nick Lowery
-(github.com/clockvapor)
-Copyright (c) 2014-2015 Nick Lowery
-
-Copyright (c) 2013-2014 Ben Croston
-
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
 the Software without restriction, including without limitation the rights to

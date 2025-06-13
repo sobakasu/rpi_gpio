@@ -3,7 +3,7 @@ Original code by Ben Croston modified for Ruby by Nick Lowery
 (github.com/clockvapor)
 Copyright (c) 2014-2020 Nick Lowery
 
-Copyright (c) 2013-2014 Ben Croston
+Copyright (c) 2013-2021 Ben Croston
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -32,6 +32,9 @@ int gpio_mode = MODE_UNKNOWN;
 const int pin_to_gpio_rev1[41] = {-1, -1, -1, 0, -1, 1, -1, 4, 14, -1, 15, 17, 18, 21, -1, 22, 23, -1, 24, 10, -1, 9, 25, 11, 8, -1, 7, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 };
 const int pin_to_gpio_rev2[41] = {-1, -1, -1, 2, -1, 3, -1, 4, 14, -1, 15, 17, 18, 27, -1, 22, 23, -1, 24, 10, -1, 9, 25, 11, 8, -1, 7, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 };
 const int pin_to_gpio_rev3[41] = {-1, -1, -1, 2, -1, 3, -1, 4, 14, -1, 15, 17, 18, 27, -1, 22, 23, -1, 24, 10, -1, 9, 25, 11, 8, -1, 7, -1, -1, 5, -1, 6, 12, 13, -1, 19, 16, 26, 20, -1, 21 };
+const int (*pin_to_gpio)[41];
+int gpio_direction[54];
+rpi_info rpiinfo;
 int setup_error = 0;
 int module_setup = 0;
 
@@ -47,7 +50,7 @@ int check_gpio_priv(void)
     // check mmap setup has worked
     if (!module_setup)
     {
-        rb_raise(rb_eRuntimeError, "no access to /dev/mem.  Try running as root!");
+        rb_raise(rb_eRuntimeError, "No access to /dev/mem.  Try running as root!");
         return 2;
     }
     return 0;
@@ -58,9 +61,7 @@ int get_gpio_number(int channel, unsigned int *gpio)
     // check setmode() has been run
     if (gpio_mode != BOARD && gpio_mode != BCM)
     {
-        rb_raise(rb_eRuntimeError, "please set pin numbering mode "
-          "using RPi::GPIO.set_numbering :board or "
-          "RPi::GPIO.set_numbering :bcm");
+        rb_raise(rb_eRuntimeError, "Please set pin numbering mode using RPi::GPIO.set_numbering(:board) or RPi::GPIO.set_numbering(:bcm)");
         return 3;
     }
 
@@ -69,7 +70,7 @@ int get_gpio_number(int channel, unsigned int *gpio)
       || (gpio_mode == BOARD && (channel < 1 || channel > 26) && rpiinfo.p1_revision != 3)
       || (gpio_mode == BOARD && (channel < 1 || channel > 40) && rpiinfo.p1_revision == 3) )
     {
-        rb_raise(rb_eArgError, "the channel sent is invalid on a Raspberry Pi");
+        rb_raise(rb_eArgError, "The channel sent is invalid on a Raspberry Pi");
         return 4;
     }
 
@@ -78,7 +79,7 @@ int get_gpio_number(int channel, unsigned int *gpio)
     {
         if (*(*pin_to_gpio+channel) == -1)
         {
-            rb_raise(rb_eArgError, "the channel sent is invalid on a Raspberry Pi");
+            rb_raise(rb_eArgError, "The channel sent is invalid on a Raspberry Pi");
             return 5;
         } else {
             *gpio = *(*pin_to_gpio+channel);
